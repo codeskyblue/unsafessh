@@ -1,5 +1,6 @@
 unsafessh
 =========
+[![Gobuild Download](http://gobuild.io/badge/github.com/codeskyblue/unsafessh/downloads.svg)](http://gobuild.io/github.com/codeskyblue/unsafessh)
 
 exec remote command easily.
 
