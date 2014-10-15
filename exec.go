@@ -21,6 +21,10 @@ var execCommand = cli.Command{
 }
 
 func execAction(ctx *cli.Context) {
+	if ctx.Bool("debug") {
+		log.SetOutputLevel(log.Ldebug)
+	}
+
 	c, err := net.Dial(ctx.GlobalString("proto"), ctx.GlobalString("addr"))
 	if err != nil {
 		log.Fatal(err)

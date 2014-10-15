@@ -33,9 +33,6 @@ func NewJsonStream(r io.Reader) chan *Protocol {
 		for {
 			v := new(Protocol)
 			if err := decoder.Decode(v); err != nil {
-				//	if err != io.EOF {
-				//		log.Warn("decode error", err)
-				//	}
 				break
 			}
 			ch <- v
