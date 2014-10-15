@@ -4,15 +4,19 @@ unsafessh
 
 exec remote command easily.
 
-developing
+* no password
+* stream stdin,stdout,stderr
+* same exitcode in server and client
+* send client signal(INT,HUP,TERM) to server
 
 ## Usage
-run in client
-```
-unsafessh --addr=unix:/tmp/unsafessh.sock exec -- echo hello
-```
-
 run in server
 ```
-unsafessh --addr=unix:/tmp/unsafessh.sock serv
+unsafessh serv
 ```
+
+run in client
+```
+unsafessh exec -- python -i
+```
+

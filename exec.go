@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/signal"
 	"syscall"
 
-	"github.com/gobuild/log"
-
 	"github.com/codegangsta/cli"
+	"github.com/gobuild/log"
 )
 
 var execCommand = cli.Command{
@@ -18,48 +16,31 @@ var execCommand = cli.Command{
 	Usage:  "execute a new command",
 	Action: execAction,
 	Flags: []cli.Flag{
-		cli.StringFlag{Name: "addr", Value: "unix:/tmp/unsafessh.sock", Usage: "listen address"},
+		cli.BoolFlag{Name: "d,debug"},
 	},
 }
 
 func execAction(ctx *cli.Context) {
-	c, err := net.Dial("unix", "/tmp/unsafessh.sock")
+	c, err := net.Dial(ctx.GlobalString("proto"), ctx.GlobalString("addr"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer c.Close()
+	rdch := NewJsonStream(c)
+	send := NewJsonSender(c)
 
-	rdch := make(chan *Protocol)
-	go func() {
-		decoder := json.NewDecoder(c)
-		for {
-			v := new(Protocol)
-			err := decoder.Decode(v)
-			if err != nil {
-				rdch <- &Protocol{Name: "ERROR", Data: "deocde error"}
-				break
-			}
-			rdch <- v
-		}
-	}()
-
-	encoder := json.NewEncoder(c)
-	send := func(name, data string) error {
-		v := &Protocol{Name: name, Data: data}
-		return encoder.Encode(v)
+	if len(ctx.Args()) == 0 {
+		log.Fatal("error: args needed")
 	}
-
-	fmt.Println(ctx.String("addr"), ctx.Args())
+	log.Debug(ctx.GlobalString("addr"), ctx.Args())
 	args, _ := json.Marshal(ctx.Args())
 	send("COMMAND", string(args))
 
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT)
-	go func() {
-		for sig := range sigCh {
-			send("SIGNAL", fmt.Sprintf("%d", sig))
+	TrapSignal(func(sig os.Signal) {
+		if err := send("SIGNAL", fmt.Sprintf("%d", sig)); err != nil {
+			log.Fatal(err)
 		}
-	}()
+	}, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
 
 	go func() {
 		for v := range rdch {
@@ -69,12 +50,14 @@ func execAction(ctx *cli.Context) {
 				fmt.Sscanf(v.Data, "%d", &exitCode)
 				os.Exit(exitCode)
 			case "STDOUT":
-				fmt.Print(v.Data)
+				os.Stdout.WriteString(v.Data)
+			case "STDERR":
+				os.Stderr.WriteString(v.Data)
 			case "ERROR":
 				fmt.Println(v.Data)
 				os.Exit(1)
 			default:
-				fmt.Println(v)
+				log.Warn("Unknown data:", v)
 			}
 		}
 	}()
@@ -86,6 +69,5 @@ func execAction(ctx *cli.Context) {
 		}
 		send("STDIN", string(buf[:nr]))
 	}
-	c.Write(nil)
 	fmt.Println("done")
 }

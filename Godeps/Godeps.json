@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/codeskyblue/unsafessh",
+	"GoVersion": "go1.3.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Comment": "1.2.0-26-gf7ebb76",
+			"Rev": "f7ebb761e83e21225d1d8954fde853bf8edd46c4"
+		},
+		{
+			"ImportPath": "github.com/gobuild/log",
+			"Rev": "f1f03dc733eb8acf247f889dd103ee1de1a06caa"
+		}
+	]
+}

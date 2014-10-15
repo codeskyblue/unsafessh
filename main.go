@@ -16,6 +16,18 @@ func main() {
 		execCommand,
 		servCommand,
 	}
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "addr",
+			Value: "/tmp/unsafessh.sock",
+			Usage: "listen address",
+		},
+		cli.StringFlag{
+			Name:  "proto",
+			Value: "unix",
+			Usage: "<unix|tcp>",
+		},
+	}
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
