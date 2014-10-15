@@ -70,7 +70,7 @@ func execAction(ctx *cli.Context) {
 	for {
 		nr, err := os.Stdin.Read(buf)
 		if err != nil {
-			send("SIGNAL", "NOINPUT")
+			send("STDIN", "") // EOF
 			break
 		}
 		send("STDIN", string(buf[:nr]))
