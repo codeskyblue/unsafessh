@@ -48,10 +48,10 @@ func NewJsonSender(w io.Writer) func(name string, data interface{}) error {
 	return func(name string, data interface{}) error {
 		lock.Lock()
 		defer lock.Unlock()
-		log.Debug("send", name, fmt.Sprintf("%#v", data))
+		log.Debug("Send", name, fmt.Sprintf("%#v", data))
 		err := encoder.Encode(&Protocol{Name: name, Data: fmt.Sprintf("%v", data)})
 		if err != nil {
-			log.Warn("send error", err)
+			log.Debug("Send error", err)
 		}
 		return err
 	}
