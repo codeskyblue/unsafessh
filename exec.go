@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"syscall"
+	"time"
 
 	"github.com/codegangsta/cli"
 	"github.com/gobuild/log"
@@ -70,8 +71,11 @@ func execAction(ctx *cli.Context) {
 		nr, err := os.Stdin.Read(buf)
 		if err != nil {
 			send("SIGNAL", "NOINPUT")
+			break
 		}
 		send("STDIN", string(buf[:nr]))
 	}
-	fmt.Println("done")
+	for {
+		time.Sleep(time.Second)
+	}
 }
